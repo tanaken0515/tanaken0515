@@ -1,0 +1,27 @@
+name: notify-scrapbox-diary-to-slack
+
+on:
+  schedule:
+    - cron: '30 15 * * *'
+
+jobs:
+  notify:
+
+    runs-on: ubuntu-latest
+
+    env:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 2.7
+
+      - name: Run script
+        run: |
+          cd scripts/workflows/notify-scrapbox-diary-to-slack
+          bundle install
+          bundle exec ruby main.rb
