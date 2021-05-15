@@ -23,4 +23,4 @@ jst_now = Time.now.localtime('+09:00')
 today = Date.new(jst_now.year, jst_now.month, jst_now.day)
 
 slack = Slack::Incoming::Webhooks.new(ENV['SLACK_WEBHOOK_URL'])
-slack.post(scrapbox_diary_url(today))
+slack.post("<#{scrapbox_diary_url(today)}|#{today.strftime('%F %a')}>")
