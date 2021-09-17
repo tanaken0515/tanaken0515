@@ -7,10 +7,16 @@ def scrapbox_diary_url(date)
 
   tags += ['祝日', holiday_name(date)] if holiday_name(date)
 
+  body = <<~EOS
+    #{tags.map{ |tag| '#' + tag }.join(' ')}
+    
+    [** 今日は何の日]
+    https://kids.yahoo.co.jp/today/#{date.strftime('%m%d')}
+  EOS
   URI.parse('https://scrapbox.io').tap do |uri|
     uri.path = '/tanaken0515/' + date.strftime('%F')
     uri.query = URI.encode_www_form({
-      body: tags.map{ |tag| '#' + tag }.join(' ')
+      body: body
     })
   end.to_s
 end
