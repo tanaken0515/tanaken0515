@@ -3,6 +3,7 @@ require 'slack/incoming/webhooks'
 require 'uri'
 
 def scrapbox_diary_url(date)
+  title = "#{date.strftime('%F')}:_タイトル"
   tags = %w[%Y-%m %Y年%m月 %m-%d %m月%d日 %Y-%m-%d %Y年%m月%d日].map{ |format| date.strftime(format) }
 
   tags += ['祝日', holiday_name(date)] if holiday_name(date)
@@ -16,7 +17,7 @@ def scrapbox_diary_url(date)
 
   EOS
   URI.parse('https://scrapbox.io').tap do |uri|
-    uri.path = '/tanaken0515/' + date.strftime('%F')
+    uri.path = "/tanaken0515/#{URI.encode_www_form_component(title)}"
     uri.query = URI.encode_www_form({
       body: body
     })
