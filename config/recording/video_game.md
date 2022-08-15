@@ -84,11 +84,13 @@ flowchart LR
   Aeropex
   外部ディスプレイ
   ears[fa:fa-ear My Ears]
+  FE[Friend Ears]
+  FV[Friend Voice]
   
-  Switch -- HDMI --> HD60_S+
-  HD60_S+ -- HDMI --> 外部ディスプレイ
+  Switch --->|HDMI| HD60_S+
+  HD60_S+ -->|HDMI| 外部ディスプレイ
   voice --> Blue_Yeti
-
+  FV --> 出力デバイス
   HD60_S+ --> Switch音声
   Blue_Yeti --> 外部マイク音声
 
@@ -101,7 +103,8 @@ flowchart LR
     end
 
     subgraph 音声通話アプリ
-      入力デバイス x-.-x 出力デバイス
+      出力デバイス
+      入力デバイス
     end
 
     subgraph BlackHole
@@ -137,7 +140,7 @@ flowchart LR
     
     BlackHole_64ch --> 音声出力キャプチャ
 end
-  
+  入力デバイス --> FE
   外部ディスプレイ --> ears
   出力Aux2 --> Aeropex --> ears
 ```
