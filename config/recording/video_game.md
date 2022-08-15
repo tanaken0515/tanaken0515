@@ -1,6 +1,6 @@
 # ゲーム収録環境
 
-## 2022-08-07..
+## 2022-08-07..2022-08-14
 
 ### 電源供給
 
@@ -65,4 +65,79 @@ flowchart LR
   end
   
   外部ディスプレイ --> ears[fa:fa-ear My Ears]
+```
+
+## 2022-08-15..
+
+電源供給と映像出力については変更なし。
+
+### 音声入出力
+
+音声通話アプリの出力も同時に収録できるように構成を変更した。
+
+```mermaid
+flowchart LR
+  voice[fa:fa-waveform My Voice]
+  Blue_Yeti
+  Switch
+  HD60_S+
+  Aeropex
+  外部ディスプレイ
+  ears[fa:fa-ear My Ears]
+  
+  Switch -- HDMI --> HD60_S+
+  HD60_S+ -- HDMI --> 外部ディスプレイ
+  voice --> Blue_Yeti
+
+  HD60_S+ --> Switch音声
+  Blue_Yeti --> 外部マイク音声
+
+  subgraph M1_MacBook_Air
+    Switch音声
+    外部マイク音声
+
+    subgraph Mac環境設定
+      入力装置 x-.-x 出力装置
+    end
+
+    subgraph 音声通話アプリ
+      入力デバイス x-.-x 出力デバイス
+    end
+
+    subgraph BlackHole
+      BlackHole_2ch
+      BlackHole_16ch
+      BlackHole_64ch
+    end
+
+    subgraph LadioCast
+      入力1
+      入力2
+      入力3
+      メイン出力
+      出力Aux1
+      出力Aux2
+    end
+
+    subgraph OBS_Studio
+      マイク
+      音声出力キャプチャ
+    end
+    
+    出力装置 --> BlackHole_2ch --> 入力1 x-.-x メイン出力
+    
+    外部マイク音声 --> 入力デバイス
+    外部マイク音声 --> マイク
+    
+    出力デバイス --> BlackHole_16ch --> 入力2
+    入力2 --> 出力Aux1 --> BlackHole_64ch
+    入力2 --> 出力Aux2
+
+    Switch音声 --> 入力3 --> 出力Aux1
+    
+    BlackHole_64ch --> 音声出力キャプチャ
+end
+  
+  外部ディスプレイ --> ears
+  出力Aux2 --> Aeropex --> ears
 ```
