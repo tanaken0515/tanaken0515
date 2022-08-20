@@ -16,7 +16,7 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-  hands[fa:fa-hands My Hands] 
+  My_Hands 
   Proコン
   Switch
   HD60_S+
@@ -27,11 +27,11 @@ flowchart LR
     end
   end
   外部ディスプレイ
-  eyes[fa:fa-eyes My Eyes]
+  My_Eyes
 
-  hands --> Proコン -->|Bluetooth or USB| Switch -->|HDMI| HD60_S+
+  My_Hands --> Proコン -->|Bluetooth or USB| Switch -->|HDMI| HD60_S+
   HD60_S+ -->|USB| ゲーム映像 --> 映像キャプチャデバイス
-  HD60_S+ -->|HDMI| 外部ディスプレイ --> eyes
+  HD60_S+ -->|HDMI| 外部ディスプレイ --> My_Eyes
 ```
 
 ## 音声入出力
@@ -40,7 +40,7 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-  voice[fa:fa-waveform My Voice]
+  My_Voice
   Blue_Yeti
   Switch
   HD60_S+
@@ -53,20 +53,20 @@ flowchart LR
     end
   end
   外部ディスプレイ
-  ears[fa:fa-ear My Ears]
+  My_Ears
 
-  voice --> Blue_Yeti -->|USB| 外部マイク音声 --> マイク
+  My_Voice --> Blue_Yeti -->|USB| 外部マイク音声 --> マイク
   Switch -->|HDMI| HD60_S+
   HD60_S+ -->|HDMI| ゲーム音声 --> 音声入力キャプチャ
-  HD60_S+ -->|HDMI| 外部ディスプレイ --> ears
+  HD60_S+ -->|HDMI| 外部ディスプレイ --> My_Ears
 ```
 
 ### 音声通話あり
 
 ```mermaid
 flowchart LR
-  voice[fa:fa-waveform My Voice]
-  FV[Friend Voice]
+  My_Voice
+  Friend_Voice
   Blue_Yeti
   Switch
   HD60_S+
@@ -98,20 +98,20 @@ flowchart LR
   end
   Aeropex
   外部ディスプレイ
-  ears[fa:fa-ear My Ears]
-  FE[Friend Ears]
+  My_Ears
+  Friend_Ears
   
   出力装置 --> BlackHole_2ch --> 入力1 x-.-x メイン出力
   
-  voice --> Blue_Yeti -->|USB| 外部マイク音声
-  外部マイク音声 --> 入力デバイス -.-> FE
+  My_Voice --> Blue_Yeti -->|USB| 外部マイク音声
+  外部マイク音声 --> 入力デバイス -.-> Friend_Ears
   外部マイク音声 --> マイク
 
-  FV ..-> 出力デバイス --> BlackHole_16ch
-  BlackHole_16ch --> 入力2 --> 出力Aux1 --> Aeropex --> ears
+  Friend_Voice ..-> 出力デバイス --> BlackHole_16ch
+  BlackHole_16ch --> 入力2 --> 出力Aux1 --> Aeropex --> My_Ears
   BlackHole_16ch --> 音声出力キャプチャ
 
   Switch --->|HDMI| HD60_S+
   HD60_S+ -->|HDMI| ゲーム音声 --> 音声入力キャプチャ
-  HD60_S+ -->|HDMI| 外部ディスプレイ --> ears
+  HD60_S+ -->|HDMI| 外部ディスプレイ --> My_Ears
 ```
