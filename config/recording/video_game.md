@@ -16,17 +16,22 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-  hands[fa:fa-hands My Hands] --> Proコン 
-  Proコン -- Bluetooth or USB --> Switch
-  Switch -- HDMI --> HD60_S+
-  HD60_S+  -- HDMI --> 外部ディスプレイ
-  HD60_S+  -- USB --> M1_MacBook_Air
+  hands[fa:fa-hands My Hands] 
+  Proコン
+  Switch
+  HD60_S+
   subgraph M1_MacBook_Air
+    ゲーム映像
     subgraph OBS_Studio
-      映像キャプチャデバイス --> スクリーン
+      映像キャプチャデバイス
     end
   end
-  外部ディスプレイ --> eyes[fa:fa-eyes My Eyes]
+  外部ディスプレイ
+  eyes[fa:fa-eyes My Eyes]
+
+  hands --> Proコン -->|Bluetooth or USB| Switch -->|HDMI| HD60_S+
+  HD60_S+ -->|USB| ゲーム映像 --> 映像キャプチャデバイス
+  HD60_S+ -->|HDMI| 外部ディスプレイ --> eyes
 ```
 
 ## 音声入出力
