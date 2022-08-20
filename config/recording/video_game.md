@@ -1,8 +1,6 @@
 # ゲーム収録環境
 
-## 2022-08-07..2022-08-14
-
-### 電源供給
+## 電源供給
 
 ```mermaid
 flowchart LR
@@ -14,7 +12,7 @@ flowchart LR
   M1_MacBook_Air -- USB給電 --> Blue_Yeti
 ```
 
-### 操作入力と映像出力
+## 操作入力と映像出力
 
 ```mermaid
 flowchart LR
@@ -31,7 +29,9 @@ flowchart LR
   外部ディスプレイ --> eyes[fa:fa-eyes My Eyes]
 ```
 
-### 音声入出力
+## 音声入出力
+
+### 音声通話なし
 
 ```mermaid
 flowchart LR
@@ -67,13 +67,7 @@ flowchart LR
   外部ディスプレイ --> ears[fa:fa-ear My Ears]
 ```
 
-## 2022-08-15..
-
-電源供給と映像出力については変更なし。
-
-### 音声入出力
-
-音声通話アプリの出力も同時に収録できるように構成を変更した。
+### 音声通話あり
 
 ```mermaid
 flowchart LR
