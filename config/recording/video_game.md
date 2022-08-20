@@ -1,8 +1,6 @@
 # ゲーム収録環境
 
-## 2022-08-07..2022-08-14
-
-### 電源供給
+## 電源供給
 
 ```mermaid
 flowchart LR
@@ -14,133 +12,106 @@ flowchart LR
   M1_MacBook_Air -- USB給電 --> Blue_Yeti
 ```
 
-### 操作入力と映像出力
+## 操作入力と映像出力
 
 ```mermaid
 flowchart LR
-  hands[fa:fa-hands My Hands] --> Proコン 
-  Proコン -- Bluetooth or USB --> Switch
-  Switch -- HDMI --> HD60_S+
-  HD60_S+  -- HDMI --> 外部ディスプレイ
-  HD60_S+  -- USB --> M1_MacBook_Air
+  My_Hands 
+  Proコン
+  Switch
+  HD60_S+
   subgraph M1_MacBook_Air
+    ゲーム映像
     subgraph OBS_Studio
-      映像キャプチャデバイス --> スクリーン
+      映像キャプチャデバイス
     end
   end
-  外部ディスプレイ --> eyes[fa:fa-eyes My Eyes]
+  外部ディスプレイ
+  My_Eyes
+
+  My_Hands --> Proコン -->|Bluetooth or USB| Switch -->|HDMI| HD60_S+
+  HD60_S+ -->|USB| ゲーム映像 --> 映像キャプチャデバイス
+  HD60_S+ -->|HDMI| 外部ディスプレイ --> My_Eyes
 ```
 
-### 音声入出力
+## 音声入出力
+
+### 音声通話なし
 
 ```mermaid
 flowchart LR
-  Switch -- HDMI --> HD60_S+
-  HD60_S+  -- HDMI --> 外部ディスプレイ
-  HD60_S+  -- USB --> M1_MacBook_Air
-  voice[fa:fa-waveform My Voice] --> Blue_Yeti
-  Blue_Yeti  -- USB --> M1_MacBook_Air
-
-  HD60_S+ -.-> Switch音声
-  Blue_Yeti -.-> 外部マイク音声
-
-  subgraph M1_MacBook_Air
-    Switch音声 --> 入力2
-    外部マイク音声
-
-    subgraph BlackHole
-      BlackHole_2ch
-    end
-
-    subgraph LadioCast
-      入力2 --> 出力Aux1
-      出力Aux1 --> BlackHole_2ch
-    end
-
-    外部マイク音声 --> マイク
-    subgraph OBS_Studio
-      マイク
-      BlackHole_2ch --> デスクトップ音声
-    end
-  end
-  
-  外部ディスプレイ --> ears[fa:fa-ear My Ears]
-```
-
-## 2022-08-15..
-
-電源供給と映像出力については変更なし。
-
-### 音声入出力
-
-音声通話アプリの出力も同時に収録できるように構成を変更した。
-
-```mermaid
-flowchart LR
-  voice[fa:fa-waveform My Voice]
+  My_Voice
   Blue_Yeti
   Switch
   HD60_S+
-  Aeropex
-  外部ディスプレイ
-  ears[fa:fa-ear My Ears]
-  FE[Friend Ears]
-  FV[Friend Voice]
-  
-  Switch --->|HDMI| HD60_S+
-  HD60_S+ -->|HDMI| 外部ディスプレイ
-  voice --> Blue_Yeti
-  FV --> 出力デバイス
-  HD60_S+ --> Switch音声
-  Blue_Yeti --> 外部マイク音声
-
   subgraph M1_MacBook_Air
-    Switch音声
     外部マイク音声
-
-    subgraph Mac環境設定
-      入力装置 x-.-x 出力装置
+    ゲーム音声
+    subgraph OBS_Studio
+      マイク
+      音声入力キャプチャ
     end
+  end
+  外部ディスプレイ
+  My_Ears
 
+  My_Voice --> Blue_Yeti -->|USB| 外部マイク音声 --> マイク
+  Switch -->|HDMI| HD60_S+
+  HD60_S+ -->|HDMI| ゲーム音声 --> 音声入力キャプチャ
+  HD60_S+ -->|HDMI| 外部ディスプレイ --> My_Ears
+```
+
+### 音声通話あり
+
+```mermaid
+flowchart LR
+  My_Voice
+  Friend_Voice
+  Blue_Yeti
+  Switch
+  HD60_S+
+  subgraph M1_MacBook_Air
+    ゲーム音声
+    外部マイク音声
+    subgraph Mac環境設定
+      出力装置
+    end
     subgraph 音声通話アプリ
       出力デバイス
       入力デバイス
     end
-
     subgraph BlackHole
       BlackHole_2ch
       BlackHole_16ch
-      BlackHole_64ch
     end
-
     subgraph LadioCast
       入力1
       入力2
-      入力3
       メイン出力
       出力Aux1
-      出力Aux2
     end
-
     subgraph OBS_Studio
       マイク
+      音声入力キャプチャ
       音声出力キャプチャ
-    end
-    
-    出力装置 --> BlackHole_2ch --> 入力1 x-.-x メイン出力
-    
-    外部マイク音声 --> 入力デバイス
-    外部マイク音声 --> マイク
-    
-    出力デバイス --> BlackHole_16ch --> 入力2
-    入力2 --> 出力Aux1 --> BlackHole_64ch
-    入力2 --> 出力Aux2
+    end    
+  end
+  Aeropex
+  外部ディスプレイ
+  My_Ears
+  Friend_Ears
+  
+  出力装置 --> BlackHole_2ch --> 入力1 x-.-x メイン出力
+  
+  My_Voice --> Blue_Yeti -->|USB| 外部マイク音声
+  外部マイク音声 --> 入力デバイス -.-> Friend_Ears
+  外部マイク音声 --> マイク
 
-    Switch音声 --> 入力3 --> 出力Aux1
-    
-    BlackHole_64ch --> 音声出力キャプチャ
-end
-  入力デバイス --> FE
-  外部ディスプレイ --> ears
-  出力Aux2 --> Aeropex --> ears
+  Friend_Voice ..-> 出力デバイス --> BlackHole_16ch
+  BlackHole_16ch --> 入力2 --> 出力Aux1 --> Aeropex --> My_Ears
+  BlackHole_16ch --> 音声出力キャプチャ
+
+  Switch --->|HDMI| HD60_S+
+  HD60_S+ -->|HDMI| ゲーム音声 --> 音声入力キャプチャ
+  HD60_S+ -->|HDMI| 外部ディスプレイ --> My_Ears
 ```
