@@ -66,69 +66,52 @@ flowchart LR
 ```mermaid
 flowchart LR
   voice[fa:fa-waveform My Voice]
+  FV[Friend Voice]
   Blue_Yeti
   Switch
   HD60_S+
-  Aeropex
-  外部ディスプレイ
-  ears[fa:fa-ear My Ears]
-  FE[Friend Ears]
-  FV[Friend Voice]
-  
-  Switch --->|HDMI| HD60_S+
-  HD60_S+ -->|HDMI| 外部ディスプレイ
-  voice --> Blue_Yeti
-  FV --> 出力デバイス
-  HD60_S+ --> Switch音声
-  Blue_Yeti --> 外部マイク音声
-
   subgraph M1_MacBook_Air
-    Switch音声
+    ゲーム音声
     外部マイク音声
-
     subgraph Mac環境設定
-      入力装置 x-.-x 出力装置
+      出力装置
     end
-
     subgraph 音声通話アプリ
       出力デバイス
       入力デバイス
     end
-
     subgraph BlackHole
       BlackHole_2ch
       BlackHole_16ch
-      BlackHole_64ch
     end
-
     subgraph LadioCast
       入力1
       入力2
-      入力3
       メイン出力
       出力Aux1
-      出力Aux2
     end
-
     subgraph OBS_Studio
       マイク
+      音声入力キャプチャ
       音声出力キャプチャ
-    end
-    
-    出力装置 --> BlackHole_2ch --> 入力1 x-.-x メイン出力
-    
-    外部マイク音声 --> 入力デバイス
-    外部マイク音声 --> マイク
-    
-    出力デバイス --> BlackHole_16ch --> 入力2
-    入力2 --> 出力Aux1 --> BlackHole_64ch
-    入力2 --> 出力Aux2
+    end    
+  end
+  Aeropex
+  外部ディスプレイ
+  ears[fa:fa-ear My Ears]
+  FE[Friend Ears]
+  
+  出力装置 --> BlackHole_2ch --> 入力1 x-.-x メイン出力
+  
+  voice --> Blue_Yeti -->|USB| 外部マイク音声
+  外部マイク音声 --> 入力デバイス -.-> FE
+  外部マイク音声 --> マイク
 
-    Switch音声 --> 入力3 --> 出力Aux1
-    
-    BlackHole_64ch --> 音声出力キャプチャ
-end
-  入力デバイス --> FE
-  外部ディスプレイ --> ears
-  出力Aux2 --> Aeropex --> ears
+  FV ..-> 出力デバイス --> BlackHole_16ch
+  BlackHole_16ch --> 入力2 --> 出力Aux1 --> Aeropex --> ears
+  BlackHole_16ch --> 音声出力キャプチャ
+
+  Switch --->|HDMI| HD60_S+
+  HD60_S+ -->|HDMI| ゲーム音声 --> 音声入力キャプチャ
+  HD60_S+ -->|HDMI| 外部ディスプレイ --> ears
 ```
