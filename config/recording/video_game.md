@@ -40,36 +40,25 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-  Switch -- HDMI --> HD60_S+
-  HD60_S+  -- HDMI --> 外部ディスプレイ
-  HD60_S+  -- USB --> M1_MacBook_Air
-  voice[fa:fa-waveform My Voice] --> Blue_Yeti
-  Blue_Yeti  -- USB --> M1_MacBook_Air
-
-  HD60_S+ -.-> Switch音声
-  Blue_Yeti -.-> 外部マイク音声
-
+  voice[fa:fa-waveform My Voice]
+  Blue_Yeti
+  Switch
+  HD60_S+
   subgraph M1_MacBook_Air
-    Switch音声 --> 入力2
     外部マイク音声
-
-    subgraph BlackHole
-      BlackHole_2ch
-    end
-
-    subgraph LadioCast
-      入力2 --> 出力Aux1
-      出力Aux1 --> BlackHole_2ch
-    end
-
-    外部マイク音声 --> マイク
+    ゲーム音声
     subgraph OBS_Studio
       マイク
-      BlackHole_2ch --> デスクトップ音声
+      音声入力キャプチャ
     end
   end
-  
-  外部ディスプレイ --> ears[fa:fa-ear My Ears]
+  外部ディスプレイ
+  ears[fa:fa-ear My Ears]
+
+  voice --> Blue_Yeti -->|USB| 外部マイク音声 --> マイク
+  Switch -->|HDMI| HD60_S+
+  HD60_S+ -->|HDMI| ゲーム音声 --> 音声入力キャプチャ
+  HD60_S+ -->|HDMI| 外部ディスプレイ --> ears
 ```
 
 ### 音声通話あり
