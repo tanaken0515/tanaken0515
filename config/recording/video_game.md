@@ -73,21 +73,15 @@ flowchart LR
   subgraph M1_MacBook_Air
     ゲーム音声
     外部マイク音声
-    subgraph Mac環境設定
-      出力装置
-    end
     subgraph 音声通話アプリ
       出力デバイス
       入力デバイス
     end
     subgraph BlackHole
-      BlackHole_2ch
       BlackHole_16ch
     end
     subgraph LadioCast
-      入力1
       入力2
-      メイン出力
       出力Aux1
     end
     subgraph OBS_Studio
@@ -100,8 +94,6 @@ flowchart LR
   外部ディスプレイ
   My_Ears
   Friend_Ears
-  
-  出力装置 --> BlackHole_2ch --> 入力1 x-.-x メイン出力
   
   My_Voice --> Blue_Yeti -->|USB| 外部マイク音声
   外部マイク音声 --> 入力デバイス -.-> Friend_Ears
