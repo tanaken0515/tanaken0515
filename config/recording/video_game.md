@@ -78,11 +78,11 @@ flowchart LR
       入力デバイス
     end
     subgraph BlackHole
-      BlackHole_16ch
+      BlackHole_2ch
     end
     subgraph LadioCast
-      入力2
-      出力Aux1
+      入力1
+      出力メイン
     end
     subgraph OBS_Studio
       マイク
@@ -99,11 +99,11 @@ flowchart LR
   外部マイク音声 --> 入力デバイス -.-> Friend_Ears
   外部マイク音声 --> マイク
 
-  Friend_Voice ..-> 出力デバイス --> BlackHole_16ch
-  BlackHole_16ch --> 入力2 --> 出力Aux1 --> Aeropex --> My_Ears
-  BlackHole_16ch --> 音声出力キャプチャ
+  Friend_Voice .-> 出力デバイス --> BlackHole_2ch
+  BlackHole_2ch --> 入力1 --> 出力メイン --> Aeropex --> My_Ears
+  BlackHole_2ch --> 音声出力キャプチャ
 
-  Switch --->|HDMI| HD60_S+
+  Switch -->|HDMI| HD60_S+
   HD60_S+ -->|HDMI| ゲーム音声 --> 音声入力キャプチャ
   HD60_S+ -->|HDMI| 外部ディスプレイ --> My_Ears
 ```
