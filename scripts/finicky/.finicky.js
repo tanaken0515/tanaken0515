@@ -26,7 +26,7 @@ module.exports = {
       ]),
       browser: {
         name: "Google Chrome",
-        profile: "Profile 2",
+        profile: "Profile 1",
       },
     },
     {
