@@ -4,9 +4,18 @@ module.exports = {
   handlers: [
     {
       match: finicky.matchHostnames([
+        "metabase.suzuri.jp",
+        "pepabo.onelogin.com",
         "scrapbox.pepabo.com",
         "git.pepabo.com"
       ]),
+      browser: {
+        name: "Google Chrome",
+        profile: "Default",
+      },
+    },
+    {
+      match: ["www.notion.so/pepabo/*"],
       browser: {
         name: "Google Chrome",
         profile: "Default",
