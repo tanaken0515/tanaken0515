@@ -39,12 +39,25 @@ SUZURI事業部にて、10人ほどのエンジニアチームにおける「エ
 
 ### Webアプリケーション開発業務
 
-開発を担当した業務をいくつかピックアップします。
+開発を担当した業務をいくつかピックアップして記載します。
 
 - 発注先工場の追加
 - 決済手段の追加
 - 法改正に伴う対応
 - 会計処理
+
+なお、技術スタックは次のとおりです:
+- Ruby / Ruby on Rails
+- JavaScript / CoffeeScript / Backbone.js / React / TypeScript
+- RSpec / Jest
+- PostgreSQL
+- Redis / Sidekiq
+- Elasticsearch
+- Metabase / BigQuery / Looker Studio
+- Datadog / Sentry
+- Docker
+- GitHub Actions
+- Heroku Enterprise / AWS / GCP
 
 #### 発注先工場の追加
 SUZURIは、画像をアップロードするだけでオリジナルのグッズを販売できるプラットフォームです。
