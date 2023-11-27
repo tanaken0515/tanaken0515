@@ -1,7 +1,9 @@
 # 職務経歴
 
-- 氏名: 田中 健太郎 | [GitHub](https://github.com/tanaken0515) | [X (Twitter)](https://twitter.com/tanaken0515)
-- 更新日: 2023-11-26 
+- 氏名: 田中 健太郎
+- 更新日: 2023-11-27
+
+※ このドキュメントは [GitHub](https://github.com/tanaken0515/tanaken0515/tree/main/resume) で管理されています
 
 ## 要約
 
