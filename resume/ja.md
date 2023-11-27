@@ -265,6 +265,82 @@ Webアプリケーションエンジニアとして新卒で入社し、自社�
 - AWS / GCP
 
 ## 情報発信
+
+技術イベントでの発表、ブログの執筆、Podcast等、社内外への情報発信も積極的に行なっています。
+
 ### 口頭発表
+
+比較的大きめなイベントでの発表をいくつかピックアップします。
+
+- 2022-10: [Railsのコードを読むのは楽しいよ | `Kaigi on Rails _2022_ new` - Speaker Deck](https://speakerdeck.com/tanaken0515/lightning-talks-kaigi-on-rails-2022-new)
+  - イベントURL: [`Kaigi on Rails _2022_ new` - Kaigi on Rails | Doorkeeper](https://kaigionrails.doorkeeper.jp/events/143639)
+  - 参加登録者: 不明（YouTube Liveのアーカイブ動画の文字起こしによると80名以上）
+  - 発表動画: https://www.youtube.com/live/JpjuMfOGI-4?si=FbeHFsRqbclIFODF
+  - 発表を終えてのブログ: [Kaigi on Rails 2022 に参加しました - tanaken’s blog](https://tanaken0515.hatenablog.com/entry/2022/10/29/165630)
+- 2021-11: [Proud of SUZURI CRE Team - Speaker Deck](https://speakerdeck.com/tanaken0515/proud-of-suzuri-cre-team)
+  - イベントURL: [ペパボのCRE＆CSが語る、ユーザーが安心して気持ちよく使えるサービスの裏側 - connpass](https://pepabo.connpass.com/event/229248/)
+  - 参加登録者: 142名
+  - 発表を終えてのブログ: [ペパボのCREとCSのイベントを開催しました - tanaken’s blog](https://tanaken0515.hatenablog.com/entry/2021/11/27/171517)
+- 2021-06: [Retrospective of SUZURI CRE 1st year - Speaker Deck](https://speakerdeck.com/tanaken0515/retrospective-of-suzuri-cre-1st-year)
+  - イベントURL: [43万人超のクリエイターの表現活動を支える！ECプラットフォームSUZURIの開発の裏側 - connpass](https://pepabo.connpass.com/event/215058/)
+  - 参加登録者: 180名
+  - 発表を終えてのブログ: [SUZURI CRE 1年目のふりかえりとこれから - ペパボテックブログ](https://tech.pepabo.com/2021/06/29/suzuri-cre-1st-year/)
+- 2021-02: [Creator Mind of SUZURI - Speaker Deck](https://speakerdeck.com/tanaken0515/creator-mind-of-suzuri)
+  - イベントURL: [オープンセミナー2020@岡山](https://okayama.open-seminar.org/2020/) 
+  - 参加登録者: 140名 
+  - 発表動画: https://youtu.be/ztcVUhSh0As
+  - 発表を終えてのブログ: [オープンセミナー岡山2020で発表しました - tanaken’s blog](https://tanaken0515.hatenablog.com/entry/2021/02/28/215011)
+- 2019-11: [Introduction of Deep Learning for Rubyist - Speaker Deck](https://speakerdeck.com/tanaken0515/introduction-of-deep-learning-for-rubyist)
+  - イベントURL: [鹿児島Ruby会議01](https://k-ruby.com/kagoshima-rubykaigi01/)
+  - 参加登録者: 59名
+  - 発表を終えてのブログ: [鹿児島Ruby会議01に参加しました - Pepabo Tech Portal](https://tech.pepabo.com/2019/12/13/kagoshima-rk01/)
+
 ### ブログ
+
+[はてなブログ](https://tanaken0515.hatenablog.com/) に毎月1件程度のペースでブログを書いています。
+技術的な内容のブログをいくつかピックアップします。
+
+- 2023-03: [Rubyのsetterの返り値 (2)](https://tanaken0515.hatenablog.com/entry/2023/03/30/232454) 
+- 2023-02: [Rubyのsetterの返り値](https://tanaken0515.hatenablog.com/entry/2023/02/28/233219) 
+- 2022-04: [Railsアプリケーションで遅い画面を産まないためにチェックすること](https://tanaken0515.hatenablog.com/entry/2022/04/30/212321)
+- 2021-09: [Enumerable#all? と Enumerable#any? の実装を読んだ](https://tanaken0515.hatenablog.com/entry/2021/09/26/191323)
+- 2021-01: [Date.today > Date.yesterday は必ずしも真ではなかった](https://tanaken0515.hatenablog.com/entry/2021/01/30/185516)
+- 2020-02: [API Client の rubygem を作ってみた](https://tanaken0515.hatenablog.com/entry/2020/02/28/101019)
+- 2020-01: [ruby-jp slack で ActionText の質問に答えた](https://tanaken0515.hatenablog.com/entry/2020/01/26/102533)
+
+また [Scrapbox](https://scrapbox.io/tanaken0515) にも技術的なメモを一部記録しています。
+
+- [PostgreSQLの便利な何か](https://scrapbox.io/tanaken0515/PostgreSQL%E3%81%AE%E4%BE%BF%E5%88%A9%E3%81%AA%E4%BD%95%E3%81%8B): PostgreSQLの関数や仕様についての知見を書き留めたもの
+- [Herokuの便利な何か](https://scrapbox.io/tanaken0515/Heroku%E3%81%AE%E4%BE%BF%E5%88%A9%E3%81%AA%E4%BD%95%E3%81%8B): Herokuのコマンドや仕様についての知見を書き留めたもの
+- [Ruby 日記](https://scrapbox.io/tanaken0515/Ruby_%E6%97%A5%E8%A8%98): 50日分のRuby学習記録
+
 ### そのほか
+
+技術的な内容に限らず、コミュニティへの貢献や自身の情報発信に関する取り組みをしています。
+
+#### 技術コミュニティへの貢献
+
+技術コミュニティに積極的に参加しています。
+
+- [RubyKaigi](https://rubykaigi.org) 
+  - 2019年以降毎回参加しています
+  - [2022年](https://rubykaigi.org/2022/about/) と [2023年](https://rubykaigi.org/2023/about/) は当日ヘルパーとして運営にも携わりました
+- [Rails Girls](https://railsgirls.jp/)
+  - 次のワークショップにおいてコーチを務めました
+    - [Fukuoka 2nd](https://railsgirls.com/fukuoka-2019.html)
+    - [Tokyo 13th](https://railsgirls.com/tokyo-2020-02-15.html)
+    - [Kagoshima 1st](https://railsgirls.com/kagoshima-2022.html)
+- 地域Ruby会議
+  - 鹿児島県での初開催となる [鹿児島Ruby会議01](https://k-ruby.com/kagoshima-rubykaigi01/) を主催し、運営しました
+
+#### 日記
+
+[Scrapbox](https://scrapbox.io/tanaken0515)  には日常のできごとを素朴に書いています。
+
+- https://scrapbox.io/tanaken0515/search/page?q=2023
+- https://scrapbox.io/tanaken0515/search/page?q=2022
+- https://scrapbox.io/tanaken0515/search/page?q=2021
+
+#### Podcast
+
+[てくてくラジオ](https://podcasters.spotify.com/pod/show/tektek-radio) というPodcast番組を2021年10月から運営しています。
