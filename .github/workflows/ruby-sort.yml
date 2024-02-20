@@ -21,7 +21,5 @@ jobs:
 
       - name: Run script
         run: |
-          cd scripts/workflows/ruby-example
-          gem install bundler --no-document
-          bundle install
-          bundle exec ruby sort.rb
+          ruby -v
+          ruby scripts/workflows/ruby-example/sort.rb
