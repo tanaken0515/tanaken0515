@@ -1,7 +1,7 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    holiday_jp (0.8.0)
+    holiday_jp (0.8.1)
     slack-incoming-webhooks (0.3.0)
 
 PLATFORMS
@@ -12,4 +12,4 @@ DEPENDENCIES
   slack-incoming-webhooks
 
 BUNDLED WITH
-   2.1.2
+   2.5.6
