@@ -1,0 +1,8 @@
+bgm/*
+!bgm/.gitkeep
+
+recordings/*
+!recordings/.gitkeep
+
+output/*
+!output/.gitkeep
