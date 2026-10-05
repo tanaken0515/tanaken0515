@@ -5,10 +5,11 @@
 # 発話者別wavをミックス → 無音カット → BGM合成 して mp3 を出力する。
 #
 # 使い方:
-#   ruby main.rb EPISODE_NO BGM_FILENAME [options]
+#   ruby main.rb EPISODE_NO [options]
 #
 # 例:
-#   ruby main.rb 257 271_long_BPM110.mp3
+#   ruby main.rb 257
+#   ruby main.rb 257 --bgm 271_long_BPM110.mp3
 
 require "optparse"
 require "open3"
@@ -33,7 +34,7 @@ MAX_INPUT_FILES = 5
 
 Options = Struct.new(
   :threshold, :silence, :pre_attack, :post_release,
-  :bgm_delay, :bgm_volume, :bgm_fade, :loudnorm_target, :split, :dry_run, :detect_only,
+  :bgm, :bgm_delay, :bgm_volume, :bgm_fade, :loudnorm_target, :split, :dry_run, :detect_only,
   keyword_init: true
 )
 
@@ -52,6 +53,7 @@ def parse_options(argv)
     silence: 0.8,
     pre_attack: 0.3,
     post_release: 0.3,
+    bgm: "sunday_ending.mp3",
     bgm_delay: 3.0,
     bgm_volume: 0.05,
     bgm_fade: 10.0,
@@ -62,11 +64,12 @@ def parse_options(argv)
   )
 
   parser = OptionParser.new do |opts|
-    opts.banner = "使い方: ruby main.rb EPISODE_NO BGM_FILENAME [options]"
+    opts.banner = "使い方: ruby main.rb EPISODE_NO [options]"
     opts.on("--threshold DB", Float, "無音判定のしきい値(dB) (デフォルト: -28)") { |v| options.threshold = v }
     opts.on("--silence SEC", Float, "無音とみなす最低秒数 (デフォルト: 0.8)") { |v| options.silence = v }
     opts.on("--pre-attack SEC", Float, "無音終了直前に残す秒数 (デフォルト: 0.3)") { |v| options.pre_attack = v }
     opts.on("--post-release SEC", Float, "無音開始直後に残す秒数 (デフォルト: 0.3)") { |v| options.post_release = v }
+    opts.on("--bgm FILENAME", "bgm/配下のBGMファイル名 (デフォルト: sunday_ending.mp3)") { |v| options.bgm = v }
     opts.on("--bgm-delay SEC", Float, "BGMだけが流れる秒数 (デフォルト: 3.0)") { |v| options.bgm_delay = v }
     opts.on("--bgm-volume RATIO", Float, "BGMの音量倍率 (デフォルト: 0.05)") { |v| options.bgm_volume = v }
     opts.on("--bgm-fade SEC", Float, "会話終了時のBGMフェードアウト秒数、0で無効 (デフォルト: 10)") { |v| options.bgm_fade = v }
@@ -270,12 +273,13 @@ end
 
 def main
   options, parser = parse_options(ARGV)
-  episode_no, bgm_filename = ARGV
+  episode_no, *extra_args = ARGV
 
-  if episode_no.nil? || bgm_filename.nil?
+  if episode_no.nil?
     puts parser
     exit 1
   end
+  abort_with("不明な引数です: #{extra_args.join(' ')}（BGMは --bgm で指定してください）") unless extra_args.empty?
 
   check_external_command!("ffmpeg")
   check_external_command!("ffprobe")
@@ -289,7 +293,7 @@ def main
     abort_with("入力ファイルが多すぎます(#{input_files.size}個)。#{MAX_INPUT_FILES}個以下にしてください")
   end
 
-  bgm_path = File.join(BGM_DIR, bgm_filename)
+  bgm_path = File.join(BGM_DIR, options.bgm)
   abort_with("BGMファイルが見つかりません: #{bgm_path}") unless File.exist?(bgm_path)
 
   tracks = build_tracks(input_files, options.split)

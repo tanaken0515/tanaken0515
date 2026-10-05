@@ -26,14 +26,15 @@ scripts/podcast/auto_edit/
 ## 使い方
 
 ```
-ruby main.rb EPISODE_NO BGM_FILENAME [options]
+ruby main.rb EPISODE_NO [options]
 ```
 
-例（`recordings/257/*.wav` と `bgm/271_long_BPM110.mp3` を使う場合）:
+例（`recordings/257/*.wav` を使う場合）:
 
 ```
 cd scripts/podcast/auto_edit
-ruby main.rb 257 271_long_BPM110.mp3
+ruby main.rb 257                             # BGMは bgm/sunday_ending.mp3
+ruby main.rb 257 --bgm 271_long_BPM110.mp3   # 別のBGMを使う場合
 # => output/257.mp3 が生成される
 ```
 
@@ -45,6 +46,7 @@ ruby main.rb 257 271_long_BPM110.mp3
 | `--silence SEC` | 無音とみなす最低秒数（0.8） |
 | `--pre-attack SEC` | 無音終了直前に残す秒数（0.3） |
 | `--post-release SEC` | 無音開始直後に残す秒数（0.3） |
+| `--bgm FILENAME` | `bgm/` 配下のBGMファイル名（sunday_ending.mp3） |
 | `--bgm-delay SEC` | BGMだけが流れる秒数。この秒数後に会話が始まる（3.0） |
 | `--bgm-volume RATIO` | BGMの音量倍率（0.05） |
 | `--bgm-fade SEC` | 会話終了時のBGMフェードアウト秒数。0で無効（10） |
@@ -56,7 +58,7 @@ ruby main.rb 257 271_long_BPM110.mp3
 しきい値を調整したいときは、まず `--detect-only` で無音区間の検出結果を確認してから本実行するのがおすすめです。
 
 ```
-ruby main.rb 257 271_long_BPM110.mp3 --detect-only --threshold -30
+ruby main.rb 257 --detect-only --threshold -30
 ```
 
 #### `--split`: 収録トラブルで1人の音声が2ファイルに分かれた場合
@@ -64,7 +66,7 @@ ruby main.rb 257 271_long_BPM110.mp3 --detect-only --threshold -30
 収録中に1人の音声が途切れて、前半・後半の2ファイルに分かれてしまった場合に使います。
 
 ```
-ruby main.rb 259 271_long_BPM110.mp3 --split 259_tanaken1.wav,259_tanaken2.wav
+ruby main.rb 259 --split 259_tanaken1.wav,259_tanaken2.wav
 ```
 
 - 前半ファイルの開始は他の話者の開始と、後半ファイルの終了は他の話者（のうち最長のファイル）の終了と揃っている前提です
@@ -131,9 +133,9 @@ ffmpeg -y -f lavfi -i "sine=frequency=660:duration=3" \
        -filter_complex "[0][1][2]concat=n=3:v=0:a=1[out]" -map "[out]" \
        -ar 48000 -ac 2 recordings/999/speaker2.wav
 
-# 手元にBGM音源があれば bgm/ 配下に置いて指定する（なければ適当なmp3/wavで代用可）
-ruby main.rb 999 <BGM_FILENAME> --detect-only
-ruby main.rb 999 <BGM_FILENAME>
+# BGMは bgm/sunday_ending.mp3 を使う（なければ適当なmp3/wavを bgm/ に置いて --bgm で指定する）
+ruby main.rb 999 --detect-only
+ruby main.rb 999
 # => output/999.mp3 が生成され、再生して確認できる
 
 # 後片付け
@@ -148,7 +150,7 @@ mkdir -p recordings/998
 ffmpeg -y -f lavfi -i "anullsrc=r=44100:cl=stereo:d=10" recordings/998/other.wav
 ffmpeg -y -f lavfi -i "sine=frequency=440:duration=3" recordings/998/me1.wav
 ffmpeg -y -f lavfi -i "sine=frequency=880:duration=2" recordings/998/me2.wav
-ruby main.rb 998 <BGM_FILENAME> --split me1.wav,me2.wav --detect-only
+ruby main.rb 998 --split me1.wav,me2.wav --detect-only
 rm -rf recordings/998
 ```
 
