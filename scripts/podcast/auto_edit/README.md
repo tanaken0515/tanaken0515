@@ -15,7 +15,9 @@ BGMを重ねて mp3 を出力するローカルスクリプトです。
 scripts/podcast/auto_edit/
   main.rb                       # CLI本体
   lib/silence_calculator.rb     # 無音区間→削除範囲→残す区間の純粋ロジック
-  test/silence_calculator_test.rb
+  lib/split_calculator.rb       # --split 時に分割ファイルの間に挟む無音の長さを計算する純粋ロジック
+  lib/loudness_calculator.rb    # ラウドネス測定結果の解析と、音量を揃えるゲインを計算する純粋ロジック
+  test/*_test.rb
   recordings/{episode_No}/*.wav # 発話者別の入力wav（2〜3ファイル、最大5ファイル）
   bgm/*.mp3(等)                 # ループ再生前提のBGM音源
   output/{episode_No}.mp3       # 出力先
@@ -47,6 +49,7 @@ ruby main.rb 257 271_long_BPM110.mp3
 | `--bgm-volume RATIO` | BGMの音量倍率（0.05） |
 | `--bgm-fade SEC` | 会話終了時のBGMフェードアウト秒数。0で無効（10） |
 | `--loudnorm-target LUFS` | 発話者ごとの音量を揃える目標ラウドネス(LUFS)。0で無効（-16） |
+| `--split FIRST,LAST` | 途中で途切れて2ファイルに分かれた話者の前半・後半のファイル名（後述） |
 | `--dry-run` | 実行するffmpegコマンドを表示するだけで実行しない |
 | `--detect-only` | 検出した無音区間と削除範囲を一覧表示して終了（しきい値調整用） |
 
@@ -55,6 +58,20 @@ ruby main.rb 257 271_long_BPM110.mp3
 ```
 ruby main.rb 257 271_long_BPM110.mp3 --detect-only --threshold -30
 ```
+
+#### `--split`: 収録トラブルで1人の音声が2ファイルに分かれた場合
+
+収録中に1人の音声が途切れて、前半・後半の2ファイルに分かれてしまった場合に使います。
+
+```
+ruby main.rb 259 271_long_BPM110.mp3 --split 259_tanaken1.wav,259_tanaken2.wav
+```
+
+- 前半ファイルの開始は他の話者の開始と、後半ファイルの終了は他の話者（のうち最長のファイル）の終了と揃っている前提です
+- 前半と後半の間には、尺の差から計算した長さの無音を挟んで1本のトラックに連結します
+  （途切れていた間は他の話者の音声だけになり、誰も話していなければ通常どおり無音カットされます）
+- 連結した1本に対してラウドネスを測ってゲインをかけるので、前半・後半で音量がずれることはありません
+- 前半+後半の合計が基準の尺より長い場合は、前提が崩れているのでエラーで終了します
 
 #### `--dry-run` の挙動について
 
@@ -66,11 +83,14 @@ ruby main.rb 257 271_long_BPM110.mp3 --detect-only --threshold -30
 
 ## 処理の流れ
 
-1. 発話者別wavを `loudnorm`（発話者ごとの音量を目標ラウドネスに揃える）+ `aformat`（48kHz/stereoに統一）+
-   `amix`（`normalize=0`, `duration=longest`）で1本にミックス
-   （マイクとの距離・声量の違いなどで入力ごとに音量差があっても、`loudnorm`が各ファイルの実際の音量を解析して
-   動的にゲイン調整するため、事前に手動で音量を揃える必要はありません。ミックス後にさらに大きな音量差が
-   気になる場合は `--loudnorm-target` で目標値を調整するか、`0` を指定して無効化してください）
+1. `--split` 指定時は、分割された2ファイルを `apad`（間の無音）+ `concat` で1本に連結する。
+   その上で、話者ごとのトラック全体の平均ラウドネスを `ebur128` で測定し、目標ラウドネスとの差分だけ
+   `volume` で一定のゲインをかけてから（`aformat` で48kHz/stereoに統一）、`amix`（`normalize=0`, `duration=longest`）で
+   1本にミックスし、`alimiter` でピークを約 -1.5dBFS に抑える
+   （マイクとの距離・声量の違いなどで入力ごとに音量差があっても、事前に手動で音量を揃える必要はありません。
+   ゲインは最大 +20dB で頭打ちにします。`--loudnorm-target 0` で音量調整を無効化できます）
+   - `loudnorm` を1パスで使うと、冒頭が無音の音声で無音部分のノイズを大きく持ち上げてしまい、
+     それが無音カットされずに残ってしまうため、トラック全体に一定のゲインをかける方式にしています
 2. ミックス後の音声に対して `silencedetect` で無音区間を検出し、しきい値・無音最低秒数・pre-attack・post-releaseから
    実際にカットする範囲を計算。残す区間を `atrim` + `asetpts` + `concat` で連結
    （無音判定は話者ごとではなく必ずミックス後に行うことで、同期ズレを防いでいます）
@@ -82,10 +102,11 @@ ruby main.rb 257 271_long_BPM110.mp3 --detect-only --threshold -30
 
 ## テスト
 
-無音区間の計算ロジック（`lib/silence_calculator.rb`）はminitestでテストしています。
+`lib/` 配下の純粋ロジック（無音区間の計算・分割ファイルの位置計算・ラウドネスのゲイン計算）は
+minitestでテストしています。
 
 ```
-ruby test/silence_calculator_test.rb
+for t in test/*_test.rb; do ruby $t; done
 ```
 
 ## エンドツーエンドの動作確認（サンプル音声の生成）
@@ -117,6 +138,18 @@ ruby main.rb 999 <BGM_FILENAME>
 
 # 後片付け
 rm -rf recordings/999 output/999.mp3
+```
+
+`--split` の動作確認は、10秒の基準ファイルと 3秒+2秒 に分かれたファイルで行えます。
+`--detect-only` で無音区間がちょうど `3.00 - 8.00` と出れば、後半が末尾に揃って連結されています。
+
+```bash
+mkdir -p recordings/998
+ffmpeg -y -f lavfi -i "anullsrc=r=44100:cl=stereo:d=10" recordings/998/other.wav
+ffmpeg -y -f lavfi -i "sine=frequency=440:duration=3" recordings/998/me1.wav
+ffmpeg -y -f lavfi -i "sine=frequency=880:duration=2" recordings/998/me2.wav
+ruby main.rb 998 <BGM_FILENAME> --split me1.wav,me2.wav --detect-only
+rm -rf recordings/998
 ```
 
 ## エラー時の挙動

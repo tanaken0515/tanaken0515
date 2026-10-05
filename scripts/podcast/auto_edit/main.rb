@@ -17,6 +17,8 @@ require "fileutils"
 require "shellwords"
 
 require_relative "lib/silence_calculator"
+require_relative "lib/split_calculator"
+require_relative "lib/loudness_calculator"
 
 # stdoutとstderrの出力順序がバッファリングでずれないようにする
 $stdout.sync = true
@@ -31,9 +33,13 @@ MAX_INPUT_FILES = 5
 
 Options = Struct.new(
   :threshold, :silence, :pre_attack, :post_release,
-  :bgm_delay, :bgm_volume, :bgm_fade, :loudnorm_target, :dry_run, :detect_only,
+  :bgm_delay, :bgm_volume, :bgm_fade, :loudnorm_target, :split, :dry_run, :detect_only,
   keyword_init: true
 )
+
+# ミックスする話者1人分の音声。通常は1ファイルだが、--split 指定時は
+# 前半・後半の2ファイルを gap 秒の無音を挟んで連結したものになる。
+Track = Data.define(:files, :gap)
 
 def abort_with(message)
   warn "エラー: #{message}"
@@ -50,6 +56,7 @@ def parse_options(argv)
     bgm_volume: 0.05,
     bgm_fade: 10.0,
     loudnorm_target: -16.0,
+    split: nil,
     dry_run: false,
     detect_only: false
   )
@@ -64,6 +71,10 @@ def parse_options(argv)
     opts.on("--bgm-volume RATIO", Float, "BGMの音量倍率 (デフォルト: 0.05)") { |v| options.bgm_volume = v }
     opts.on("--bgm-fade SEC", Float, "会話終了時のBGMフェードアウト秒数、0で無効 (デフォルト: 10)") { |v| options.bgm_fade = v }
     opts.on("--loudnorm-target LUFS", Float, "発話者ごとの音量を揃える目標ラウドネス(LUFS)。0で無効化 (デフォルト: -16)") { |v| options.loudnorm_target = v }
+    opts.on("--split FIRST,LAST", Array,
+            "途中で途切れて2ファイルに分かれた話者の前半,後半のファイル名。前半は先頭、後半は末尾を他の話者に揃える") do |v|
+      options.split = v
+    end
     opts.on("--dry-run", "実行するffmpegコマンドを表示するだけで実行しない") { options.dry_run = true }
     opts.on("--detect-only", "検出した無音区間と削除範囲を一覧表示して終了(しきい値調整用)") { options.detect_only = true }
   end
@@ -106,22 +117,96 @@ def run_ffmpeg!(args, step_name:)
   stderr
 end
 
-# 発話者別wavを1本にミックスする。サンプルレート/チャンネル数のばらつきは
-# aformatで48kHz/stereoに揃えてから amix する。
-# loudnorm_targetが指定されていれば、amixする前に発話者ごとの音量(ラウドネス)を揃える
-# （マイクとの距離や声量の違いで入力ごとに音量差があっても、動的に解析して揃えてくれる）。
-def build_mix_args(input_files, mixed_path, loudnorm_target)
-  inputs = input_files.flat_map { |f| ["-i", f] }
-  formats = input_files.each_index.map do |i|
-    chain = String.new
-    chain << "loudnorm=I=#{loudnorm_target}:TP=-1.5:LRA=11," if loudnorm_target&.nonzero?
-    chain << "aformat=sample_rates=48000:channel_layouts=stereo"
-    "[#{i}:a]#{chain}[a#{i}]"
+AFORMAT = "aformat=sample_rates=48000:channel_layouts=stereo"
+
+# 1トラック分の入力を48kHz/stereoに揃えて [label] に出力するフィルタを組み立てる。
+# 2ファイルに分かれたトラックは、前半の後ろに apad で無音を足してから後半と concat する。
+# post_filter を指定すると、揃えた後にそのフィルタをかける。
+def build_track_chain(track, indexes, label, post_filter = nil)
+  tail = ",#{post_filter}" if post_filter
+
+  if indexes.size == 1
+    "[#{indexes[0]}:a]#{AFORMAT}#{tail}[#{label}]"
+  else
+    first, last = indexes
+    pad = ",apad=pad_dur=#{track.gap}" if track.gap.positive?
+    [
+      "[#{first}:a]#{AFORMAT}#{pad}[#{label}_a]",
+      "[#{last}:a]#{AFORMAT}[#{label}_b]",
+      "[#{label}_a][#{label}_b]concat=n=2:v=0:a=1#{tail}[#{label}]"
+    ].join(";")
   end
-  labels = input_files.each_index.map { |i| "[a#{i}]" }.join
-  filter = "#{formats.join(';')};#{labels}amix=inputs=#{input_files.size}:duration=longest:normalize=0[mixed]"
+end
+
+# トラック全体の平均ラウドネスを ebur128 で測定するコマンドを組み立てる。
+# 分割トラックは連結した状態で測る（間の無音はEBU R128のゲートで計算から除外される）。
+def build_measure_args(track)
+  inputs = track.files.flat_map { |f| ["-i", f] }
+  chain = build_track_chain(track, track.files.each_index.to_a, "out", "ebur128=framelog=quiet")
+  ["-nostats", *inputs, "-filter_complex", chain, "-map", "[out]", "-f", "null", "-"]
+end
+
+# 話者ごとの音量を揃えるためのゲイン(dB)をトラックごとに測定して返す。
+def measure_gains(tracks, loudnorm_target)
+  tracks.map do |track|
+    names = track.files.map { |f| File.basename(f) }.join(" + ")
+    stderr = run_ffmpeg!(build_measure_args(track), step_name: "ラウドネス測定")
+    measured = LoudnessCalculator.parse_integrated(stderr)
+    gain = LoudnessCalculator.gain_db(measured, loudnorm_target)
+    puts format("ラウドネス: %s = %s → ゲイン %+.2fdB", names, measured ? format("%.1f LUFS", measured) : "測定不可", gain)
+    gain
+  end
+end
+
+# 話者ごとのトラックを1本にミックスする。サンプルレート/チャンネル数のばらつきは
+# aformatで48kHz/stereoに揃えてから amix する。
+# gains が指定されていれば、amixする前にトラックごとに一定のゲインをかけて音量(ラウドネス)を揃え、
+# ミックス後に alimiter でピークを -1.5dBFS 程度に抑える。
+# （loudnormの1パス処理は冒頭が無音だとノイズを大きく持ち上げてしまうため使わない）
+def build_mix_args(tracks, mixed_path, gains)
+  inputs = tracks.flat_map(&:files).flat_map { |f| ["-i", f] }
+
+  input_index = 0
+  chains = tracks.each_with_index.map do |track, t|
+    indexes = track.files.each_index.map { input_index.tap { input_index += 1 } }
+    volume = format("volume=%.2fdB", gains[t]) if gains
+    build_track_chain(track, indexes, "a#{t}", volume)
+  end
+  labels = tracks.each_index.map { |t| "[a#{t}]" }.join
+  limiter = ",alimiter=limit=0.84:level=disabled:latency=enabled" if gains
+  filter = "#{chains.join(';')};#{labels}amix=inputs=#{tracks.size}:duration=longest:normalize=0#{limiter}[mixed]"
 
   ["-y", *inputs, "-filter_complex", filter, "-map", "[mixed]", mixed_path]
+end
+
+# 入力ファイルを話者ごとのトラックにまとめる。
+# --split 指定時は、前半ファイルの開始を他の話者の開始に、後半ファイルの終了を
+# 他の話者のうち最長のファイルの終了に揃えるよう、間に挟む無音の長さを計算する。
+def build_tracks(input_files, split)
+  return input_files.map { |f| Track.new(files: [f], gap: 0.0) } if split.nil?
+
+  abort_with("--split には前半,後半の2ファイルをカンマ区切りで指定してください") unless split.size == 2
+  abort_with("--split に同じファイルが指定されています") if split.uniq.size != split.size
+
+  by_name = input_files.to_h { |f| [File.basename(f), f] }
+  split_files = split.map do |name|
+    by_name.fetch(name) { abort_with("--split で指定したファイルが収録ディレクトリにありません: #{name}") }
+  end
+  others = input_files - split_files
+  abort_with("--split で指定したファイル以外に、位置合わせの基準となる話者のファイルが必要です") if others.empty?
+
+  first_duration, last_duration = split_files.map { |f| probe_duration(f) }
+  reference_duration = others.map { |f| probe_duration(f) }.max
+
+  gap = begin
+    SplitCalculator.gap_duration(first_duration, last_duration, reference_duration)
+  rescue SplitCalculator::InvalidDurationError => e
+    abort_with(e.message)
+  end
+  puts format("分割ファイルの連結: %s(%.2f秒) + 無音(%.2f秒) + %s(%.2f秒) = 基準の尺 %.2f秒",
+              split[0], first_duration, gap, split[1], last_duration, reference_duration)
+
+  others.map { |f| Track.new(files: [f], gap: 0.0) } + [Track.new(files: split_files, gap: gap)]
 end
 
 def build_silencedetect_args(mixed_path, threshold, silence)
@@ -207,6 +292,8 @@ def main
   bgm_path = File.join(BGM_DIR, bgm_filename)
   abort_with("BGMファイルが見つかりません: #{bgm_path}") unless File.exist?(bgm_path)
 
+  tracks = build_tracks(input_files, options.split)
+
   FileUtils.mkdir_p(OUTPUT_DIR)
   output_path = File.join(OUTPUT_DIR, "#{episode_no}.mp3")
 
@@ -215,10 +302,12 @@ def main
     cut_path = File.join(tmp_dir, "cut.wav")
     script_path = File.join(tmp_dir, "cut_filter.txt")
 
-    # 1. ミックスと2. 無音検出は、後続コマンドを正確に組み立てるための解析ステップなので
+    # ラウドネス測定・1. ミックス・2. 無音検出は、後続コマンドを正確に組み立てるための解析ステップなので
     #    --dry-run でも実行する（一時ファイルはブロック終了時に自動削除される）。
+    gains = measure_gains(tracks, options.loudnorm_target) if options.loudnorm_target.nonzero?
+
     puts "[1/3] ミックス"
-    run_ffmpeg!(build_mix_args(input_files, mixed_path, options.loudnorm_target), step_name: "ミックス")
+    run_ffmpeg!(build_mix_args(tracks, mixed_path, gains), step_name: "ミックス")
 
     total_duration = probe_duration(mixed_path)
 
