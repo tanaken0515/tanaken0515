@@ -117,7 +117,22 @@ def run_ffmpeg!(args, step_name:)
     warn stderr.lines.last(20).join
     exit 1
   end
+  warn_deprecations(stderr, step_name)
   stderr
+end
+
+# 同じ警告を何度も表示しないよう、表示済みの行を覚えておく
+SHOWN_DEPRECATIONS = Set.new
+
+# ffmpegが成功時にもstderrに出す非推奨警告を表示する。
+# 非推奨のオプション・フィルタは将来のバージョンで削除される（例: -filter_complex_script は7.0で非推奨、9.0で削除）ので、
+# ffmpegのバージョンを上げる前に気付けるようにする。
+def warn_deprecations(stderr, step_name)
+  stderr.each_line.map(&:strip).grep(/deprecated/i).each do |line|
+    next unless SHOWN_DEPRECATIONS.add?(line)
+
+    warn "警告: ffmpegが非推奨の機能を検出しました(#{step_name}): #{line}"
+  end
 end
 
 AFORMAT = "aformat=sample_rates=48000:channel_layouts=stereo"
