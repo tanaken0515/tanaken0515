@@ -217,7 +217,8 @@ def build_silencedetect_args(mixed_path, threshold, silence)
 end
 
 # 残す区間を atrim + asetpts で切り出し、concat で連結するコマンドを組み立てる。
-# 区間が多いとコマンドが長くなるため -filter_complex_script でファイル渡しにする。
+# 区間が多いとコマンドが長くなるため -/filter_complex でファイル渡しにする
+# （旧来の -filter_complex_script は ffmpeg 7.0 で非推奨、9.0 で削除された）。
 def build_cut_args(mixed_path, keep_ranges, script_path, cut_path)
   lines = keep_ranges.each_with_index.map do |(s, e), i|
     "[0:a]atrim=start=#{s}:end=#{e},asetpts=PTS-STARTPTS[c#{i}]"
@@ -226,7 +227,7 @@ def build_cut_args(mixed_path, keep_ranges, script_path, cut_path)
   lines << "#{concat_labels}concat=n=#{keep_ranges.size}:v=0:a=1[cut]"
   File.write(script_path, lines.join(";\n"))
 
-  ["-y", "-i", mixed_path, "-filter_complex_script", script_path, "-map", "[cut]", cut_path]
+  ["-y", "-i", mixed_path, "-/filter_complex", script_path, "-map", "[cut]", cut_path]
 end
 
 # BGMを bgm-delay 秒だけ遅らせた会話に重ねる。
